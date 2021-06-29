@@ -13,13 +13,6 @@ import (
 	"time"
 )
 
-var (
-	InfoLogger  *log.Logger
-	UrlEntities []ShortUrlEntity
-	Counter     = 0
-	letters     = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
-)
-
 type ShortUrlEntity struct {
 	id          int
 	originalUrl string
@@ -29,6 +22,14 @@ type ShortUrlEntity struct {
 type RequestBodyGenerateUrl struct {
 	Url string
 }
+
+var (
+	InfoLogger  *log.Logger
+	UrlEntities []ShortUrlEntity
+	Counter     = 0
+	letters     = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+	r           *rand.Rand
+)
 
 func handleGenerateUrl(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -89,7 +90,7 @@ func handleCheckUrl(w http.ResponseWriter, r *http.Request) {
 func randomSequence(n int) string {
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+		b[i] = letters[r.Intn(len(letters))]
 	}
 	return string(b)
 }
@@ -101,9 +102,12 @@ func main() {
 		log.Ldate|log.Ltime|log.Lmsgprefix,
 	)
 
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	multiplexer := http.NewServeMux()
 
 	multiplexer.HandleFunc("/url", handleGenerateUrl)
+	multiplexer.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./public"))))
 	multiplexer.HandleFunc("/", handleCheckUrl)
 
 	server := &http.Server{

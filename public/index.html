@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    input {
+      width: 600px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h1>Encurtador de Url</h1>
+    <input v-model="url" type="text">
+    <button @click="generateUrl">Encurtar</button>
+    <div>
+      <a :href="shortUrl" target="_blank">{{ shortUrl }}</a>
+    </div>
+  </div>
+</body>
+<script src="https://unpkg.com/vue@next"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+  const App = {
+    data() {
+      return {
+        url: "",
+        shortUrl: ""
+      }
+    },
+    methods: {
+      async generateUrl() {
+        const response = await axios.post("http://localhost:8003/url", {
+          url: this.url
+        })
+        this.shortUrl = response.data.url
+      }
+    }
+  }
+
+  Vue.createApp(App).mount("#app")
+</script>
+</html>
